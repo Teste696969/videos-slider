@@ -37,7 +37,7 @@ body {
 
 .video-container {
   width: 100%;
-  height: calc(100vh - 80px);
+  height: 85vh;
   scroll-snap-type: y mandatory;
   align-content: center;
   justify-content: center;

@@ -1,0 +1,71 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  background-color: #242424;
+    overflow-y: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.auto-scroll-button {
+  margin: 5px auto;
+  display: block;
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  backdrop-filter: blur(5px);
+  transition: background 0.3s;
+}
+
+.auto-scroll-button:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.video-container {
+  width: 100%;
+  height: calc(100vh - 80px);
+  scroll-snap-type: y mandatory;
+  align-content: center;
+  justify-content: center;
+  overflow-y: scroll;
+  position: relative;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.video-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.video-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  scroll-snap-align: start;
+  position: relative;
+  background-color: black;
+  margin: 0 auto; /* Center horizontally */
+}
+
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

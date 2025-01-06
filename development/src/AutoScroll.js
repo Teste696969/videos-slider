@@ -5,11 +5,11 @@ export function setupAutoScroll(videoContainer) {
   // Create auto-scroll button
   const button = document.createElement('button');
   button.className = 'auto-scroll-button';
-  button.textContent = '🔄 Auto-scroll: On';
+  button.textContent = '🔄 On';
   
   function toggleAutoScroll() {
     isAutoScrollEnabled = !isAutoScrollEnabled;
-    button.textContent = `🔄 Auto-scroll: ${isAutoScrollEnabled ? 'On' : 'Off'}`;
+    button.textContent = `🔄 ${isAutoScrollEnabled ? 'On' : 'Off'}`;
     
     // Toggle loop for all videos
     const videos = videoContainer.querySelectorAll('video');

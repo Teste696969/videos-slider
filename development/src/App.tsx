@@ -17,6 +17,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('2d');
   const [selectedAuthor, setSelectedAuthor] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [repeatCount, setRepeatCount] = useState(0); 
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const authors = Array.from(new Set(videoData.videos.map(video => video.autor)));
@@ -33,14 +34,22 @@ function App() {
   }, [selectedCategory, selectedAuthor]);
 
   const handleVideoEnd = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % videos.length);
+    if (repeatCount < 3 && videoRef.current?.duration <= 30) {
+      setRepeatCount((prev) => prev + 1);
+      videoRef.current?.play(); // Reproduzir novamente
+    } else {
+      setRepeatCount(0); // Resetar a contagem
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % videos.length);
+    }
   };
 
   const playNextVideo = () => {
+    setRepeatCount(0); // Resetar a contagem
     setCurrentIndex((prevIndex) => (prevIndex + 1) % videos.length);
   };
 
   const playPreviousVideo = () => {
+    setRepeatCount(0); // Resetar a contagem
     setCurrentIndex((prevIndex) => (prevIndex - 1 + videos.length) % videos.length);
   };
 
@@ -66,6 +75,12 @@ function App() {
   }, [currentIndex, videos]);
 
   const currentVideo = videos[currentIndex];
+
+  const handleMetadataLoaded = () => {
+    if (videoRef.current?.duration > 40) {
+      setRepeatCount(0); // Resetar se o vídeo for maior que 40s
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black flex flex-col">
@@ -121,6 +136,7 @@ function App() {
             autoPlay
             controls
             onEnded={handleVideoEnd}
+            onLoadedMetadata={handleMetadataLoaded}
           />
         )}
 

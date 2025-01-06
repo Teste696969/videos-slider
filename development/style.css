@@ -43,6 +43,8 @@ body {
   justify-content: center;
   overflow-y: scroll;
   position: relative;
+  scroll-snap-align: center; /* Alinha o centro */
+  scroll-snap-stop: always;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
 }

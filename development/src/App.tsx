@@ -34,7 +34,7 @@ function App() {
   }, [selectedCategory, selectedAuthor]);
 
   const handleVideoEnd = () => {
-    if (repeatCount < 3 && videoRef.current?.duration <= 30) {
+    if (repeatCount < 2 && videoRef.current?.duration <= 30) {
       setRepeatCount((prev) => prev + 1);
       videoRef.current?.play(); // Reproduzir novamente
     } else {
@@ -85,7 +85,7 @@ function App() {
   return (
     <div className="min-h-screen bg-black flex flex-col">
       <div className="bg-black text-white p-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold">Video Player</h1>
+        <h1 className="text-xl font-bold">Nothing Here</h1>
         <button 
           onClick={() => setShowFilters(!showFilters)}
           className="flex items-center gap-2 px-4 py-2 rounded bg-gray-800 hover:bg-gray-700"

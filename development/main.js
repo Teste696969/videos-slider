@@ -21,6 +21,7 @@ const authorSelect = document.createElement('select');
 authorSelect.className = 'filter-select';
 authorSelect.innerHTML = `<option value="">All Authors</option>`;
 
+
 // Obter categorias e autores únicos
 const categories = [...new Set(videoData.videos.map(video => video.categoria))];
 const authors = [...new Set(videoData.videos.map(video => video.autor))];
@@ -53,9 +54,12 @@ container.appendChild(controlsContainer);
 container.appendChild(videoContainer);
 
 // Variáveis para gerenciamento de carregamento
-const BATCH_SIZE = 8;
+const BATCH_SIZE = 5;
 let loadedVideos = 0;
 let filteredVideos = shuffleArray(videoData.videos);
+
+// Carregar lista de vídeos assistidos do localStorage
+let watchedVideos = JSON.parse(localStorage.getItem('watchedVideos')) || [];
 
 // Função para carregar vídeos com base nos filtros
 function applyFilters() {
@@ -87,13 +91,17 @@ function loadBatch() {
   if (nextBatch.length === 0) return;
 
   nextBatch.forEach(video => {
+    if (watchedVideos.includes(video.url)) {
+      return; // Skip already watched videos
+    }
+
     const wrapper = document.createElement('div');
     wrapper.className = 'video-wrapper';
 
     const videoElement = document.createElement('video');
     videoElement.className = 'video';
     videoElement.src = video.url;
-    videoElement.loop = false;
+    videoElement.loop = false; // Desativar loop para vídeos que não estão em foco
     videoElement.controls = true;
     videoElement.muted = false;
     videoElement.playsInline = true;
@@ -101,6 +109,7 @@ function loadBatch() {
     videoElement.addEventListener('ended', () => {
       scrollToNextVideo();
       handleActiveVideo(null);
+      markAsWatched(video.url); // Marcar vídeo como assistido
     });
 
     videoElement.addEventListener('play', () => {
@@ -131,6 +140,14 @@ function updateSentinel() {
     sentinel.className = 'sentinel';
     sentinelTarget.appendChild(sentinel);
     batchObserver.observe(sentinel);
+  }
+}
+
+// Função para marcar vídeo como assistido
+function markAsWatched(videoUrl) {
+  if (!watchedVideos.includes(videoUrl)) {
+    watchedVideos.push(videoUrl);
+    localStorage.setItem('watchedVideos', JSON.stringify(watchedVideos));
   }
 }
 

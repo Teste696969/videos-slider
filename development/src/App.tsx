@@ -17,15 +17,33 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [loadingTimeout, setLoadingTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [selectedAuthor, setSelectedAuthor] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [repeatCount, setRepeatCount] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
-  const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const authors = Array.from(new Set(videoData.videos.map((video) => video.autor)));
+  const getAuthorCounts = () => {
+    const filteredVideos = videoData.videos.filter(
+      (video) => !selectedCategory || video.categoria === selectedCategory
+    );
+    const counts = filteredVideos.reduce((acc, video) => {
+      acc[video.autor] = (acc[video.autor] || 0) + 1;
+      return acc;
+    }, {});
+    return counts;
+  };
+
+  const authors = Array.from(
+    new Set(
+      videoData.videos
+        .filter((video) => !selectedCategory || video.categoria === selectedCategory)
+        .map((video) => video.autor)
+    )
+  );
+
   const categories = Array.from(new Set(videoData.videos.map((video) => video.categoria)));
 
   const toggleLoop = () => {
@@ -34,7 +52,6 @@ function App() {
       videoRef.current.loop = !isLooping; // Atualiza a propriedade loop do elemento <video>
     }
   };
-
 
   useEffect(() => {
     const filteredVideos = videoData.videos.filter((video) => {
@@ -74,7 +91,7 @@ function App() {
   };
 
   const handleVideoEnd = () => {
-    if (repeatCount < 3 && videoRef.current?.duration <= 40) {
+    if (repeatCount < 1 && videoRef.current?.duration <= 15) {
       setRepeatCount((prev) => prev + 1);
       videoRef.current?.play();
     } else {
@@ -84,6 +101,30 @@ function App() {
       } else {
         videoRef.current?.play();
       }
+    }
+  };
+
+  const handleVideoWaiting = () => {
+    if (!currentVideo?.url) {
+      console.warn("Video source is empty. Skipping to the next.");
+      playNextVideo();
+      return;
+    }
+
+    if (loadingTimeout) clearTimeout(loadingTimeout); // Limpa qualquer timeout anterior
+
+    const timeout = setTimeout(() => {
+      console.warn("Video is taking too long to load. Skipping to the next.");
+      playNextVideo();
+    }, 10000); // 10 segundos de limite
+
+    setLoadingTimeout(timeout);
+  };
+
+  const handleVideoPlaying = () => {
+    if (loadingTimeout) {
+      clearTimeout(loadingTimeout);
+      setLoadingTimeout(null);
     }
   };
 
@@ -109,23 +150,49 @@ function App() {
     }
   };
 
-  const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newProgress = Number(e.target.value);
-    if (videoRef.current) {
-      videoRef.current.currentTime = (videoRef.current.duration * newProgress) / 100;
-    }
-    setProgress(newProgress);
-  };
-
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setProgress((videoRef.current.currentTime / videoRef.current.duration) * 100);
-    }
-  };
-
-
   const currentVideo = videos[currentIndex];
 
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.focus(); // Dá foco no vídeo
+    }
+  }, [currentVideo]); // Executa sempre que o vídeo atual mudar
+
+  useEffect(() => {
+    if (!currentVideo?.url) {
+      console.warn("Video source is empty. Skipping to the next.");
+      playNextVideo();
+    }
+  }, [currentVideo]);
+
+
+  useEffect(() => {
+    if (videoRef.current) {
+      const video = videoRef.current;
+  
+      const handleTimeUpdate = () => setCurrentTime(video.currentTime);
+  
+      const handleLoadedMetadata = () => setDuration(video.duration);
+  
+      const ensurePlay = async () => {
+        try {
+          await video.play();
+        } catch (err) {
+          console.warn("Falha ao reproduzir o vídeo automaticamente:", err);
+        }
+      };
+  
+      video.addEventListener('timeupdate', handleTimeUpdate);
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      ensurePlay(); // Garante que o vídeo será reproduzido automaticamente
+  
+      return () => {
+        video.removeEventListener('timeupdate', handleTimeUpdate);
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      };
+    }
+  }, [currentVideo]); // Roda sempre que o vídeo atual muda
+  
   return (
     <div className="min-h-screen bg-black text-orange-500">
       <div className="bg-black p-4 flex items-center justify-between">
@@ -162,31 +229,37 @@ function App() {
             <select
               value={selectedAuthor}
               onChange={(e) => setSelectedAuthor(e.target.value)}
-              className="bg-orange-600 rounded px-3 py-2"
+              className="bg-gray-700 rounded px-3 py-2"
             >
               <option value="">All</option>
-              {authors.map((author) => (
+              {Object.entries(getAuthorCounts()).map(([author, count]) => (
                 <option key={author} value={author}>
-                  {author}
+                  {author} ({count})
                 </option>
               ))}
             </select>
           </div>
+
         </div>
       )}
 
       {currentVideo && (
         <video
           ref={videoRef}
-          key={currentVideo.url}
+          key={currentVideo?.url || 'empty-video'}
           className="w-full h-full object-contain"
-          src={currentVideo.url}
-          style={{ height: "540px" }}
+          src={currentVideo?.url || ''}
+          style={{ height: "740px" }}
           autoPlay
+          // controls
           onEnded={handleVideoEnd}
           onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
           onLoadedMetadata={() => setDuration(videoRef.current?.duration || 0)}
+          onWaiting={handleVideoWaiting} // Configura timeout se o vídeo demorar
+          onPlaying={handleVideoPlaying} // Limpa timeout quando o vídeo começar
+          tabIndex={0}
         />
+
       )}
 
       {/* Controles do vídeo */}
@@ -205,14 +278,14 @@ function App() {
             }}
             className="w-full mx-4 appearance-none h-2 bg-orange-500 rounded-lg cursor-pointer"
             style={{
-              background: `linear-gradient(to right, orange ${(currentTime / duration) * 100}%, #ccc ${(currentTime / duration) * 100}%)`,
+              background: `linear-gradient(to right, orange ${(currentTime / duration) * 100}%,rgb(41, 40, 40) ${(currentTime / duration) * 100}%)`,
               WebkitAppearance: 'none',
             }}
           />
-          <div className="flex items-center justify-between text-sm text-white mt-2">
+          {/* <div className="flex items-center justify-between text-sm text-white mt-2">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
-          </div>
+          </div> */}
         </div>
 
         <div className="flex flex-row items-center gap-4 justify-between bg-black">

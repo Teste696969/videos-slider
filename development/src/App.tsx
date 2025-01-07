@@ -181,7 +181,7 @@ function App() {
           key={currentVideo.url}
           className="w-full h-full object-contain"
           src={currentVideo.url}
-          style={{ height: "500px" }}
+          style={{ height: "540px" }}
           autoPlay
           onEnded={handleVideoEnd}
           onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
@@ -250,9 +250,9 @@ function App() {
         </div>
       </div>
 
-      <div className="text-orange-500 p-4">
+      <div className="text-orange-500 flex flex-row items-center justify-center p-4">
         <p className="text-sm">
-          Playing: {currentVideo?.autor} - {currentVideo?.categoria}
+          {currentVideo?.autor} - {currentVideo?.categoria}
         </p>
       </div>
     </div>

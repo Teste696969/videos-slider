@@ -14,7 +14,7 @@ function shuffleArray<T>(array: T[]): T[] {
 function App() {
   const [videos, setVideos] = useState(shuffleArray(videoData.videos));
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('2D/3D'); // Categoria padrão
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [loadingTimeout, setLoadingTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
@@ -32,7 +32,7 @@ function App() {
     const counts = filteredVideos.reduce((acc, video) => {
       acc[video.autor] = (acc[video.autor] || 0) + 1;
       return acc;
-    }, {});
+    }, {}); 
     return counts;
   };
 
@@ -44,7 +44,10 @@ function App() {
     )
   );
 
-  const categories = Array.from(new Set(videoData.videos.map((video) => video.categoria)));
+  const categories = Array.from(new Set([
+    '2D/3D',  // Nova categoria combinada
+    ...videoData.videos.map((video) => video.categoria)
+  ]));
 
   const toggleLoop = () => {
     setIsLooping((prev) => !prev);
@@ -55,7 +58,9 @@ function App() {
 
   useEffect(() => {
     const filteredVideos = videoData.videos.filter((video) => {
-      const categoryMatch = selectedCategory ? video.categoria === selectedCategory : true;
+      const categoryMatch = selectedCategory === '2D/3D' 
+        ? (video.categoria === '2d' || video.categoria === '3d') 
+        : (selectedCategory ? video.categoria === selectedCategory : true);
       const authorMatch = selectedAuthor ? video.autor === selectedAuthor : true;
       return categoryMatch && authorMatch;
     });
@@ -67,10 +72,7 @@ function App() {
     if (videoRef.current) {
       const video = videoRef.current;
 
-      // Atualiza o tempo atual a cada mudança no vídeo
       const handleTimeUpdate = () => setCurrentTime(video.currentTime);
-
-      // Define a duração do vídeo
       const handleLoadedMetadata = () => setDuration(video.duration);
 
       video.addEventListener('timeupdate', handleTimeUpdate);
@@ -82,7 +84,6 @@ function App() {
       };
     }
   }, [videoRef]);
-
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -165,34 +166,6 @@ function App() {
     }
   }, [currentVideo]);
 
-
-  useEffect(() => {
-    if (videoRef.current) {
-      const video = videoRef.current;
-  
-      const handleTimeUpdate = () => setCurrentTime(video.currentTime);
-  
-      const handleLoadedMetadata = () => setDuration(video.duration);
-  
-      const ensurePlay = async () => {
-        try {
-          await video.play();
-        } catch (err) {
-          console.warn("Falha ao reproduzir o vídeo automaticamente:", err);
-        }
-      };
-  
-      video.addEventListener('timeupdate', handleTimeUpdate);
-      video.addEventListener('loadedmetadata', handleLoadedMetadata);
-      ensurePlay(); // Garante que o vídeo será reproduzido automaticamente
-  
-      return () => {
-        video.removeEventListener('timeupdate', handleTimeUpdate);
-        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      };
-    }
-  }, [currentVideo]); // Roda sempre que o vídeo atual muda
-  
   return (
     <div className="min-h-screen bg-black text-orange-500">
       <div className="bg-black p-4 flex items-center justify-between">
@@ -216,8 +189,8 @@ function App() {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="bg-orange-600 rounded px-3 py-2"
             >
-              <option value="">All</option>
-              {categories.map((category) => (
+              <option value="2D/3D">2D/3D</option> {/* Nova opção combinada */}
+              {categories.filter(category => category !== '2D/3D').map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
@@ -239,7 +212,6 @@ function App() {
               ))}
             </select>
           </div>
-
         </div>
       )}
 
@@ -259,7 +231,6 @@ function App() {
           onPlaying={handleVideoPlaying} // Limpa timeout quando o vídeo começar
           tabIndex={0}
         />
-
       )}
 
       {/* Controles do vídeo */}
@@ -282,10 +253,6 @@ function App() {
               WebkitAppearance: 'none',
             }}
           />
-          {/* <div className="flex items-center justify-between text-sm text-white mt-2">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div> */}
         </div>
 
         <div className="flex flex-row items-center gap-4 justify-between bg-black">
@@ -315,8 +282,7 @@ function App() {
           {/* Botão de Loop */}
           <button
             onClick={toggleLoop}
-            className={`flex items-center justify-center px-4 py-2 rounded ${isLooping ? 'bg-orange-500 text-white' : 'bg-gray-800 text-white'
-              } `}
+            className={`flex items-center justify-center px-4 py-2 rounded ${isLooping ? 'bg-orange-500 text-white' : 'bg-gray-800 text-white'}`}
           >
             Loop
           </button>

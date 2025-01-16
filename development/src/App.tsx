@@ -221,7 +221,7 @@ function App() {
           key={currentVideo?.url || 'empty-video'}
           className="w-full h-full object-contain"
           src={currentVideo?.url || ''}
-          style={{ height: "740px" }}
+          style={{ height: "800px" }}
           autoPlay
           // controls
           onEnded={handleVideoEnd}

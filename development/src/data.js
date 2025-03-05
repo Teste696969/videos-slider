@@ -947,7 +947,7 @@ export const videoData = {
       "autor": "Plaga",
     },
     {
-      "url": "../public/videos/3173378.mp4",
+      "url": "../videos/3173378.mp4",
       "categoria": "2d",
       "autor": "Gmeen",
     },
@@ -967,7 +967,7 @@ export const videoData = {
       "autor": "Gmeen",
     },
     {
-      "url": "../public/videos/katarina-x-mundo_720p.mp4",
+      "url": "./videos/katarina-x-mundo_720p.mp4",
       "categoria": "2d",
       "autor": "Leedash0118",
     },
@@ -1167,12 +1167,12 @@ export const videoData = {
       "autor": "Wappah",
     },
     {
-      "url": "../public/videos/wappah-smashing-the-babysitter_720p.mp4",
+      "url": "./videos/wappah-smashing-the-babysitter_720p.mp4",
       "categoria": "2d",
       "autor": "Wappah",
     },
     {
-      "url": "../public/videos/wappah-wilson-x-roxy-maxwell_720p.mp4",
+      "url": "./videos/wappah-wilson-x-roxy-maxwell_720p.mp4",
       "categoria": "2d",
       "autor": "Wappah",
     },

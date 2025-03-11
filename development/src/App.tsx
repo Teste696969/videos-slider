@@ -173,7 +173,7 @@ function App() {
             : "portrait";
 
         await screen.orientation.lock(newOrientation);
-        focusVideo()
+        focusVideo();
         console.log(`Orientação alterada para: ${screen.orientation.type}`);
       } catch (err) {
         console.error("Não foi possível mudar a orientação:", err);

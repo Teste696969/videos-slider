@@ -164,16 +164,21 @@ function App() {
   };
 
   const toggleOrientation = async () => {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen(); // Entra em fullscreen
+    }
+
     if (screen.orientation && screen.orientation.lock) {
       try {
-        
+        if (videoRef.current) {
+          videoRef.current.focus(); // Dá foco no vídeo
+        }
         const newOrientation =
           screen.orientation.type.startsWith("portrait")
             ? "landscape"
             : "portrait";
 
         await screen.orientation.lock(newOrientation);
-        focusVideo();
         console.log(`Orientação alterada para: ${screen.orientation.type}`);
       } catch (err) {
         console.error("Não foi possível mudar a orientação:", err);

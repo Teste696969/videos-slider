@@ -19,11 +19,15 @@ function App() {
   const [duration, setDuration] = useState(0);
   const [loadingTimeout, setLoadingTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [selectedAuthor, setSelectedAuthor] = useState('');
+  const [isLandscape, setIsLandscape] = useState(
+    window.innerWidth > window.innerHeight
+  );
   const [showFilters, setShowFilters] = useState(false);
   const [repeatCount, setRepeatCount] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerVideoRef = useRef<HTMLVideoElement>(null);
 
   const getAuthorCounts = () => {
     const filteredVideos = videoData.videos.filter(
@@ -32,7 +36,7 @@ function App() {
     const counts = filteredVideos.reduce((acc, video) => {
       acc[video.autor] = (acc[video.autor] || 0) + 1;
       return acc;
-    }, {}); 
+    }, {});
     return counts;
   };
 
@@ -55,11 +59,24 @@ function App() {
       videoRef.current.loop = !isLooping; // Atualiza a propriedade loop do elemento <video>
     }
   };
+  const focusVideo = () => {
+    if (videoRef.current) {
+      videoRef.current.focus();
+    }
+  };
+  useEffect(() => {
+    const handleOrientationChange = () => {
+      setIsLandscape(window.innerWidth > window.innerHeight);
+    };
+
+    window.addEventListener("resize", handleOrientationChange);
+    return () => window.removeEventListener("resize", handleOrientationChange);
+  }, []);
 
   useEffect(() => {
     const filteredVideos = videoData.videos.filter((video) => {
-      const categoryMatch = selectedCategory === '2D/3D' 
-        ? (video.categoria === '2d' || video.categoria === '3d') 
+      const categoryMatch = selectedCategory === '2D/3D'
+        ? (video.categoria === '2d' || video.categoria === '3d')
         : (selectedCategory ? video.categoria === selectedCategory : true);
       const authorMatch = selectedAuthor ? video.autor === selectedAuthor : true;
       return categoryMatch && authorMatch;
@@ -92,16 +109,17 @@ function App() {
   };
 
   const handleVideoEnd = () => {
-    if (repeatCount < 1 && videoRef.current?.duration <= 15) {
-      setRepeatCount((prev) => prev + 1);
-      videoRef.current?.play();
+    setRepeatCount(0);
+    if (!isLooping) {
+      playNextVideo();
     } else {
-      setRepeatCount(0);
-      if (!isLooping) {
-        playNextVideo();
-      } else {
-        videoRef.current?.play();
-      }
+      videoRef.current?.play();
+    }
+
+    // Verifica se o vídeo atual está em fullscreen
+    if (document.fullscreenElement) {
+      // Reentra no modo fullscreen após a troca
+      videoRef.current?.requestFullscreen();
     }
   };
 
@@ -132,11 +150,37 @@ function App() {
   const playNextVideo = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % videos.length);
     setRepeatCount(0);
+
+    // Verifica se o vídeo atual está em fullscreen
+    if (document.fullscreenElement) {
+      // Reentra no modo fullscreen após a troca
+      videoRef.current?.requestFullscreen();
+    }
   };
 
   const playPreviousVideo = () => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + videos.length) % videos.length);
     setRepeatCount(0);
+  };
+
+  const toggleOrientation = async () => {
+    if (screen.orientation && screen.orientation.lock) {
+      try {
+        
+        const newOrientation =
+          screen.orientation.type.startsWith("portrait")
+            ? "landscape"
+            : "portrait";
+
+        await screen.orientation.lock(newOrientation);
+        focusVideo()
+        console.log(`Orientação alterada para: ${screen.orientation.type}`);
+      } catch (err) {
+        console.error("Não foi possível mudar a orientação:", err);
+      }
+    } else {
+      console.warn("Seu navegador não suporta screen.orientation.lock()");
+    }
   };
 
   const handlePausePlay = () => {
@@ -173,7 +217,7 @@ function App() {
 
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-4 py-2 rounded bg-orange-500 hover:bg-orange-400"
+          className="flex items-center gap-2 px-4 py-2 rounded bg-gray-800 hover:bg-orange-400"
         >
           <Filter size={20} />
           Filters
@@ -216,21 +260,26 @@ function App() {
       )}
 
       {currentVideo && (
-        <video
-          ref={videoRef}
-          key={currentVideo?.url || 'empty-video'}
-          className="w-full h-full object-contain"
-          src={currentVideo?.url || ''}
-          style={{ height: "800px" }}
-          autoPlay
-          // controls
-          onEnded={handleVideoEnd}
-          onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
-          onLoadedMetadata={() => setDuration(videoRef.current?.duration || 0)}
-          onWaiting={handleVideoWaiting} // Configura timeout se o vídeo demorar
-          onPlaying={handleVideoPlaying} // Limpa timeout quando o vídeo começar
-          tabIndex={0}
-        />
+        <div
+          ref={containerVideoRef}
+          style={{ height: isLandscape ? "385px" : "820px" }} // Altura dinâmica
+        >
+          <video
+            ref={videoRef}
+            key={currentVideo?.url || 'empty-video'}
+            className="w-full h-full object-contain"
+            src={currentVideo?.url || ''}
+            autoPlay
+            // controls
+            onEnded={handleVideoEnd}
+            onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
+            onLoadedMetadata={() => setDuration(videoRef.current?.duration || 0)}
+            onWaiting={handleVideoWaiting} // Configura timeout se o vídeo demorar
+            onPlaying={handleVideoPlaying} // Limpa timeout quando o vídeo começar
+            tabIndex={0}
+          />
+        </div>
+
       )}
 
       {/* Controles do vídeo */}
@@ -255,37 +304,57 @@ function App() {
           />
         </div>
 
-        <div className="flex flex-row items-center gap-4 justify-between bg-black">
-          {/* Botão Pause/Play */}
-          <button
-            onClick={handlePausePlay}
-            className="bg-orange-500 hover:bg-orange-500 px-4 py-2 rounded"
-          >
-            {isPaused ? 'Play' : 'Pause'}
-          </button>
-          {/* Botão Anterior */}
-          <button
-            onClick={playPreviousVideo}
-            className="bg-orange-500 hover:bg-orange-500 px-4 py-2 rounded"
-          >
-            <SkipBack />
-          </button>
+        <div className="flex flex-col items-center gap-4 justify-between bg-black">
+          <div className="flex flex-row items-center gap-4 justify-between bg-black">
+            {/* Botão Pause/Play */}
+            <button
+              onClick={handlePausePlay}
+              className="bg-gray-800 hover:bg-orange-500 px-4 py-2 rounded"
+            >
+              {isPaused ? 'Play' : 'Pause'}
+            </button>
+            {/* Botão Anterior */}
+            <button
+              onClick={playPreviousVideo}
+              className="bg-gray-800 hover:bg-orange-500 px-4 py-2 rounded"
+            >
+              <SkipBack />
+            </button>
 
-          {/* Botão Próximo */}
-          <button
-            onClick={playNextVideo}
-            className="bg-orange-500 hover:bg-orange-500 px-4 py-2 rounded"
-          >
-            <SkipForward />
-          </button>
+            {/* Botão Próximo */}
+            <button
+              onClick={playNextVideo}
+              className="bg-gray-800 hover:bg-orange-500 px-4 py-2 rounded"
+            >
+              <SkipForward />
+            </button>
 
-          {/* Botão de Loop */}
-          <button
-            onClick={toggleLoop}
-            className={`flex items-center justify-center px-4 py-2 rounded ${isLooping ? 'bg-orange-500 text-white' : 'bg-gray-800 text-white'}`}
-          >
-            Loop
-          </button>
+            {/* Botão de Loop */}
+            <button
+              onClick={toggleLoop}
+              className={`flex items-center justify-center px-4 py-2 rounded ${isLooping ? 'bg-orange-500 text-white' : 'bg-gray-800 text-white'}`}
+            >
+              Loop
+            </button>
+          </div>
+
+          <div className='flex flex-row items-center gap-4'>
+            {/* Botão de Foco */}
+            <button
+              onClick={focusVideo}
+              className="bg-gray-800 hover:bg-orange-500 px-4 py-2 rounded"
+            >
+              Focus
+            </button>
+
+            {/* Botão de Paisagem */}
+            <button
+              onClick={toggleOrientation}
+              className="bg-gray-800 hover:bg-orange-500 px-4 py-2 rounded"
+            >
+              Mudar para Paisagem
+            </button>
+          </div>
         </div>
       </div>
 

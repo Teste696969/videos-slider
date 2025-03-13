@@ -20,6 +20,7 @@ function App() {
   const [loadingTimeout, setLoadingTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [selectedAuthor, setSelectedAuthor] = useState('');
   const [isDesktopMode, setIsDesktopMode] = useState(false);
+  const [isShowBar, setIsShowBar] = useState("block");
   const [isLandscape, setIsLandscape] = useState(
     window.innerWidth > window.innerHeight
   );
@@ -29,7 +30,7 @@ function App() {
   const [isLooping, setIsLooping] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerVideoRef = useRef<HTMLVideoElement>(null);
-  const videoContainerHeight = isDesktopMode ? "785px" : (isLandscape ? "385px" : "820px");
+  const videoContainerHeight = isDesktopMode ? "800px" : (isLandscape ? "400px" : "8450px");
 
   const toggleDesktopMode = () => {
     setIsDesktopMode((prev) => !prev);
@@ -65,6 +66,11 @@ function App() {
       videoRef.current.loop = !isLooping; // Atualiza a propriedade loop do elemento <video>
     }
   };
+
+  const toggleShowBar = () => {
+    setIsShowBar(!isShowBar)
+  };
+
   const focusVideo = () => {
     if (videoRef.current) {
       videoRef.current.focus();
@@ -314,11 +320,12 @@ function App() {
             }}
             className="w-full mx-4 appearance-none h-2 bg-orange-500 rounded-lg cursor-pointer"
             style={{
+              display: isShowBar ? "block" : "none",
               background: `linear-gradient(to right, orange ${(currentTime / duration) * 100}%,rgb(41, 40, 40) ${(currentTime / duration) * 100}%)`,
               WebkitAppearance: 'none',
             }}
           />
-        </div>
+        </div> 
 
         <div className="flex flex-col items-center gap-4 justify-between bg-black">
           <div className="flex flex-row items-center gap-4 justify-between bg-black">
@@ -363,13 +370,20 @@ function App() {
               Foco
             </button>
 
-
             {/* Botão de Paisagem */}
             <button
               onClick={toggleOrientation}
               className="bg-gray-800 hover:bg-orange-500 px-4 py-2 rounded"
             >
               Paisagem
+            </button>
+
+            {/* Botão de Bar */}
+            <button
+              onClick={toggleShowBar}
+              className="bg-gray-800 hover:bg-orange-500 px-4 py-2 rounded"
+            >
+              Bar
             </button>
           </div>
         </div>

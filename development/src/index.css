@@ -11,6 +11,10 @@
     color: white;
 }
 
+body::-webkit-scrollbar {
+  width: 0px;              
+}
+
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;

@@ -19,6 +19,7 @@ function App() {
   const [duration, setDuration] = useState(0);
   const [loadingTimeout, setLoadingTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [selectedAuthor, setSelectedAuthor] = useState('');
+  const [isDesktopMode, setIsDesktopMode] = useState(false);
   const [isLandscape, setIsLandscape] = useState(
     window.innerWidth > window.innerHeight
   );
@@ -28,6 +29,11 @@ function App() {
   const [isLooping, setIsLooping] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerVideoRef = useRef<HTMLVideoElement>(null);
+  const videoContainerHeight = isDesktopMode ? "785px" : (isLandscape ? "385px" : "820px");
+
+  const toggleDesktopMode = () => {
+    setIsDesktopMode((prev) => !prev);
+  };
 
   const getAuthorCounts = () => {
     const filteredVideos = videoData.videos.filter(
@@ -219,7 +225,13 @@ function App() {
     <div className="min-h-screen bg-black text-orange-500">
       <div className="bg-black p-4 flex items-center justify-between">
         <h1 className="text-xl text-white font-bold">Nothing Here</h1>
-
+        {/* Botão de Modo Desktop/Celular */}
+        <button
+              onClick={toggleDesktopMode}
+              className="bg-gray-800 hover:bg-orange-500 px-4 py-2 rounded"
+            >
+              {isDesktopMode ? 'Celular' : 'Desktop'}
+            </button>
         <button
           onClick={() => setShowFilters(!showFilters)}
           className="flex items-center gap-2 px-4 py-2 rounded bg-gray-800 hover:bg-orange-400"
@@ -267,7 +279,7 @@ function App() {
       {currentVideo && (
         <div
           ref={containerVideoRef}
-          style={{ height: isLandscape ? "385px" : "820px" }} // Altura dinâmica
+          style={{ height: videoContainerHeight }}
         >
           <video
             ref={videoRef}
@@ -289,7 +301,6 @@ function App() {
 
       {/* Controles do vídeo */}
       <div className="flex flex-col items-center gap-4 justify-between bg-black p-4">
-        {/* Timeline */}
         <div className="w-full px-4">
           <input
             type="range"
@@ -349,15 +360,16 @@ function App() {
               onClick={focusVideo}
               className="bg-gray-800 hover:bg-orange-500 px-4 py-2 rounded"
             >
-              Focus
+              Foco
             </button>
+
 
             {/* Botão de Paisagem */}
             <button
               onClick={toggleOrientation}
               className="bg-gray-800 hover:bg-orange-500 px-4 py-2 rounded"
             >
-              Mudar para Paisagem
+              Paisagem
             </button>
           </div>
         </div>

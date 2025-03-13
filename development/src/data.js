@@ -192,11 +192,6 @@ export const videoData = {
       "autor": "Shoestrang",
     },
     {
-      "url": "https://rule34xyz.b-cdn.net/posts/3753/3753149/3753149.mov720.mp4",
-      "categoria": "2d",
-      "autor": "Shoestrang",
-    },
-    {
       "url": "https://rule34xyz.b-cdn.net/posts/3749/3749978/3749978.mov.mp4",
       "categoria": "2d",
       "autor": "Shoestrang",

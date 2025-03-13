@@ -30,7 +30,7 @@ function App() {
   const [isLooping, setIsLooping] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerVideoRef = useRef<HTMLVideoElement>(null);
-  const videoContainerHeight = isDesktopMode ? "800px" : (isLandscape ? "400px" : "8450px");
+  const videoContainerHeight = isDesktopMode ? "800px" : (isLandscape ? "385px" : "845px");
 
   const toggleDesktopMode = () => {
     setIsDesktopMode((prev) => !prev);

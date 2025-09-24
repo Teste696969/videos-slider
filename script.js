@@ -5,6 +5,8 @@ const muteBtn = document.querySelector(".mute-btn");
 const currentTimeElem = document.querySelector(".current-time");
 const totalTimeElem = document.querySelector(".total-time")
 const videoTitleElem = document.querySelector('.video-title');
+const videoURL = document.querySelector('.video-url');
+const artistURL = document.querySelector('.artist-url');
 const controlsContainer = document.querySelector('.video-controls-container');
 const volumeSlider = document.querySelector(".volume-slider");
 const videoContainer = document.querySelector(".video-container");
@@ -156,9 +158,15 @@ function loadVideo(index) {
   video.src = currentPlaylist[index].url;
   video.load();
   video.play();
-
+  
+  const artist = currentPlaylist[index].autor;
+  const url = currentPlaylist[index].url;
+  const parts = url.split('/');
+  const id = parts[5];
   // Atualizar dinamicamente o título do vídeo usando autor e categoria
-  videoTitleElem.textContent = `${currentPlaylist[index].autor} - ${currentPlaylist[index].categoria}`;
+  videoTitleElem.textContent = `${currentPlaylist[index].categoria}`;
+  videoURL.textContent = `${id}`;
+  artistURL.textContent = `${artist}`;
 }
 
 // Play/Pause

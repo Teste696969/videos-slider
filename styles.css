@@ -52,39 +52,6 @@ body {
   margin: 5px;
 }
 
-.video-title-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: start;
-}
-
-.video-container.theater,
-.video-container.full-screen {
-  max-width: initial;
-  width: 100%;
-}
-
-.video-container.full-screen {
-  max-height: 100vh;
-}
-
-.btn {
-  font-weight: bold;
-  background-color: #ff8533;
-  color: white;
-}
-
-.btn:hover {
-  background-color: #e68d52;
-  color: white;
-}
-
-video {
-  max-width: 100%;
-  width: 100%;
-  outline: none;
-}
-
 .video-container {
   position: relative;
   width: 1300px;
@@ -93,6 +60,30 @@ video {
   justify-content: center;
   margin-inline: auto;
   background-color: black;
+}
+
+.video-urls-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.video-url {
+  cursor: pointer;
+}
+
+.video-url:hover {
+  color: #ff8533;
+  transition: ease-in-out 0.2s;
+}
+
+.artist-url {
+  cursor: pointer;
+}
+
+.artist-url:hover {
+  color: #ff8533;
+  transition: ease-in-out 0.2s;
 }
 
 .video-container.theater,

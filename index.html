@@ -40,7 +40,6 @@
           </a>
           <div class="dropdown-menu" aria-labelledby="genreDropdown">
             <a class="dropdown-item" href="#" data-filter="genre" data-value="">All Genres</a>
-            <!-- Genres will be populated dynamically -->
           </div>
         </li>
       </ul>
@@ -50,7 +49,13 @@
   <div class="container-main mt-5">
     <div>
       <div class="video-title-container">
-        <h2 class="video-title"></h2>
+        <div class="video-urls-container">
+          <h5 class="video-url"></h5>
+          <h5> - </h5>
+          <h5 class="artist-url"></h5>
+          <h5> - </h5>
+          <h5 class="video-title"></h5>
+        </div>
       </div>
       <div class="video-container paused" data-volume-level="high">
         <img class="thumbnail-img">
@@ -96,9 +101,12 @@
             </button>
           </div>
         </div>
+        
         <video id="video-player">
           <source src="videos/video1.mp4" type="video/mp4">
         </video>
+
+        
       </div>
     </div>
   </div>

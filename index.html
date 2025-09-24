@@ -25,9 +25,27 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="authorDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Author
+          </a>
+          <div class="dropdown-menu" aria-labelledby="authorDropdown">
+            <a class="dropdown-item" href="#" data-filter="author" data-value="">All Authors</a>
+            <!-- Authors will be populated dynamically -->
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="genreDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Genre
+          </a>
+          <div class="dropdown-menu" aria-labelledby="genreDropdown">
+            <a class="dropdown-item" href="#" data-filter="genre" data-value="">All Genres</a>
+            <!-- Genres will be populated dynamically -->
+          </div>
+        </li>
+      </ul>
     </div>
   </nav>
-
 
   <div class="container-main mt-5">
     <div>
@@ -83,6 +101,7 @@
         </video>
       </div>
     </div>
+  </div>
 
   <!-- Adicione Bootstrap JS e Popper.js -->
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"

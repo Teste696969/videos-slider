@@ -17,25 +17,37 @@ const nextButton = document.getElementById('next-button');
 const randomButton = document.getElementById('random-button');
 const loopButton = document.getElementById('loop-button');
 
+// Elementos para filtragem
+const authorDropdown = document.getElementById('authorDropdown');
+const genreDropdown = document.getElementById('genreDropdown');
+
 // Mutáveis e Variáveis
-let videos = []; // Array que armazenará os dados do JSON
+let videos = []; // Array que armazenará os dados do JSON (lista completa, não filtrada)
+let currentPlaylist = []; // Lista atual (filtrada ou completa)
 let maxVideoIndex = 0;
 let hideControlsTimeout;
 let isMouseOver = false;
-let currentVideoIndex = 0; // Inicia em 0 (índice base do array)
+let currentVideoIndex = 0; // Inicia em 0 (índice base da playlist atual)
 let randomHistory = [];
 let isLoopActive = false;
 let isRandomActive = true; // Desative a reprodução aleatória por padrão
 let videoQueue = [];
+let currentAuthorFilter = ''; // Filtro atual por autor
+let currentGenreFilter = ''; // Filtro atual por gênero
 
 // Carregar o JSON assincronamente
 fetch('Videos.json')
   .then(response => response.json())
   .then(data => {
     videos = data;
-    maxVideoIndex = videos.length;
+    currentPlaylist = [...videos]; // Inicialmente, playlist completa
+    maxVideoIndex = currentPlaylist.length;
     videoQueue = Array.from({length: maxVideoIndex}, (_, i) => i); // Índices de 0 a maxVideoIndex-1
-    console.log(videos)
+    console.log(videos);
+    
+    // Popular os dropdowns de filtro
+    populateFilters();
+    
     currentVideoIndex = 0;
     loadVideo(currentVideoIndex);
   })
@@ -44,11 +56,88 @@ fetch('Videos.json')
     alert('Erro ao carregar a lista de vídeos. Verifique o console para mais detalhes.');
   });
 
-// Função para encontrar o índice do vídeo pelo autor ou categoria
+// Função para popular os dropdowns de autor e gênero
+function populateFilters() {
+  // Autores únicos
+  const uniqueAuthors = [...new Set(videos.map(v => v.autor))].sort();
+  const authorMenu = authorDropdown.nextElementSibling;
+  uniqueAuthors.forEach(author => {
+    const item = document.createElement('a');
+    item.className = 'dropdown-item';
+    item.href = '#';
+    item.dataset.filter = 'author';
+    item.dataset.value = author;
+    item.textContent = author;
+    authorMenu.appendChild(item);
+  });
+
+  // Gêneros únicos
+  const uniqueGenres = [...new Set(videos.map(v => v.categoria))].sort();
+  const genreMenu = genreDropdown.nextElementSibling;
+  uniqueGenres.forEach(genre => {
+    const item = document.createElement('a');
+    item.className = 'dropdown-item';
+    item.href = '#';
+    item.dataset.filter = 'genre';
+    item.dataset.value = genre;
+    item.textContent = genre;
+    genreMenu.appendChild(item);
+  });
+
+  // Adicionar event listeners aos itens do dropdown
+  document.querySelectorAll('.dropdown-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const filterType = item.dataset.filter;
+      const value = item.dataset.value;
+      
+      // Atualizar o texto do dropdown
+      const dropdown = item.closest('.dropdown').querySelector('.dropdown-toggle');
+      dropdown.textContent = value || (filterType === 'author' ? 'Author' : 'Genre');
+      
+      // Aplicar filtro
+      if (filterType === 'author') {
+        currentAuthorFilter = value;
+      } else {
+        currentGenreFilter = value;
+      }
+      applyFilter();
+    });
+  });
+}
+
+// Função para aplicar o filtro e atualizar a playlist
+function applyFilter() {
+  const filteredVideos = videos.filter(v => {
+    const authorMatch = !currentAuthorFilter || v.autor === currentAuthorFilter;
+    const genreMatch = !currentGenreFilter || v.categoria === currentGenreFilter;
+    return authorMatch && genreMatch;
+  });
+
+  currentPlaylist = filteredVideos;
+  maxVideoIndex = currentPlaylist.length;
+
+  if (maxVideoIndex === 0) {
+    console.warn('Nenhum vídeo encontrado com os filtros aplicados.');
+    // Opcional: pausar vídeo ou mostrar mensagem
+    video.pause();
+    videoTitleElem.textContent = 'Nenhum vídeo disponível';
+    return;
+  }
+
+  // Resetar navegação para a nova playlist
+  currentVideoIndex = 0;
+  videoQueue = Array.from({length: maxVideoIndex}, (_, i) => i);
+  randomHistory = []; // Limpar histórico de random para evitar índices inválidos
+
+  loadVideo(currentVideoIndex);
+}
+
+// Função para encontrar o índice do vídeo pelo autor ou categoria (mantida, mas agora usa currentPlaylist)
 function findVideoIndexByName(searchTerm) {
-  for (let i = 0; i < videos.length; i++) {
-    const autor = videos[i].autor.toLowerCase();
-    const categoria = videos[i].categoria.toLowerCase();
+  for (let i = 0; i < currentPlaylist.length; i++) {
+    const autor = currentPlaylist[i].autor.toLowerCase();
+    const categoria = currentPlaylist[i].categoria.toLowerCase();
     if (autor.includes(searchTerm) || categoria.includes(searchTerm)) {
       return i;
     }
@@ -61,16 +150,25 @@ function getRandomIndex(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Função para carregar um vídeo (adaptada para usar URL do JSON)
+// Função para carregar um vídeo (agora usa currentPlaylist)
 function loadVideo(index) {
   if (index < 0 || index >= maxVideoIndex) return; // Validação de índice
-  video.src = videos[index].url;
+  video.src = currentPlaylist[index].url;
   video.load();
   video.play();
 
   // Atualizar dinamicamente o título do vídeo usando autor e categoria
-  videoTitleElem.textContent = `${videos[index].autor} - ${videos[index].categoria}`;
+  videoTitleElem.textContent = `${currentPlaylist[index].autor} - ${currentPlaylist[index].categoria}`;
 }
+
+// Play/Pause
+playPauseBtn.addEventListener("click", togglePlay)
+video.addEventListener("click", togglePlay)
+
+function togglePlay() {
+  video.paused ? video.play() : video.pause()
+}
+
 
 // Event Listener para o botão Anterior
 prevButton.addEventListener('click', () => {
@@ -115,7 +213,7 @@ randomButton.addEventListener('click', () => {
   }
 });
 
-// Função para obter o próximo vídeo aleatório (adaptada para índices 0-based)
+// Função para obter o próximo vídeo aleatório (adaptada para índices 0-based da currentPlaylist)
 function getRandomVideo() {
   if (videoQueue.length === 0) {
     videoQueue = Array.from({length: maxVideoIndex}, (_, i) => i);
@@ -280,43 +378,8 @@ video.addEventListener("volumechange", () => {
   } else {
     volumeLevel = "low"
   }
-
-  videoContainer.dataset.volumeLevel = volumeLevel
-})
-
-// Modos de visualização
-fullScreenBtn.addEventListener("click", toggleFullScreenMode)
-
-function toggleFullScreenMode() {
-  if (document.fullscreenElement == null) {
-    videoContainer.requestFullscreen();
-    controlsContainer.classList.add('fullscreen');
-    hideControlsTimeout = setTimeout(() => {
-      if (!video.paused) {
-        controlsContainer.style.opacity = 0;
-        document.body.style.cursor = 'none';
-      }
-    }, 2000);
-  } else {
-    document.exitFullscreen();
-    controlsContainer.classList.remove('fullscreen');
-    controlsContainer.style.opacity = 1;
-    document.body.style.cursor = 'auto';
-    clearTimeout(hideControlsTimeout);
-  }
 }
-
-document.addEventListener('fullscreenchange', () => {
-  videoContainer.classList.toggle('full-screen', document.fullscreenElement);
-});
-
-// Play/Pause
-playPauseBtn.addEventListener("click", togglePlay)
-video.addEventListener("click", togglePlay)
-
-function togglePlay() {
-  video.paused ? video.play() : video.pause()
-}
+)
 
 video.addEventListener("play", () => {
   videoContainer.classList.remove("paused")
@@ -348,3 +411,25 @@ video.addEventListener('mousemove', () => {
     }, 2000);
   }
 });
+
+
+fullScreenBtn.addEventListener("click", toggleFullScreenMode)
+
+function toggleFullScreenMode() {
+  if (document.fullscreenElement == null) {
+    videoContainer.requestFullscreen();
+    controlsContainer.classList.add('fullscreen');
+    hideControlsTimeout = setTimeout(() => {
+      if (!video.paused) {
+        controlsContainer.style.opacity = 0;
+        document.body.style.cursor = 'none';
+      }
+    }, 2000);
+  } else {
+    document.exitFullscreen();
+    controlsContainer.classList.remove('fullscreen');
+    controlsContainer.style.opacity = 1;
+    document.body.style.cursor = 'auto';
+    clearTimeout(hideControlsTimeout);
+  }
+}

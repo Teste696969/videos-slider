@@ -432,7 +432,7 @@ video {
 }
 @media (max-width: 1000px) {
  .video-container { /* Muda para proporção 16:9 padrão em mobile para melhor adaptação de vídeo */
-    width: 400px;
+    width: 360px;
     height: 100%;
  }
 }

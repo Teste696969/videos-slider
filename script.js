@@ -197,7 +197,22 @@ function loadVideo(index) {
     videoTitleElem.textContent = `${currentPlaylist[index].categoria}`;
   }
 
-  videoURL.textContent = `${id}`;
+  let id_formatted
+
+  if (id.split(".")[0].includes("_720p")) {
+    id_formatted = id.split(".")[0].split("_720p")[0]
+    videoURL.textContent = `${id_formatted}`;
+  } else if (id.split(".")[0].includes("_480p")) {
+    id_formatted = id.split(".")[0].split("_480p")[0]
+    videoURL.textContent = `${id_formatted}`;
+  } else if (id.split(".")[0].includes("_360p")) {
+    id_formatted = id.split(".")[0].split("_360p")[0]
+    videoURL.textContent = `${id_formatted}`;
+  } else {
+    id_formatted = id.split(".")[0]
+    videoURL.textContent = `${id_formatted}`;
+  }
+
   artistURL.textContent = `${artist}`;
 
   currentVideoURL = url;

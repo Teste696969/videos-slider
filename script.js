@@ -162,8 +162,13 @@ function handleVideoClick() {
 
 function handleArtistClick() {
   if (currentArtist) {
-    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(currentArtist)} porn`;
+    if (currentVideoURL.includes("github")){
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(currentArtist)} rule34video.com`;
       window.open(searchUrl, '_blank');
+    } else {
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(currentArtist)} porn`;
+      window.open(searchUrl, '_blank');
+    }
   } else {
     alert(`Artista não disponível.`);
   }
@@ -190,7 +195,7 @@ function loadVideo(index) {
     id = parts[5];
     videoTitleElem.textContent = `${currentPlaylist[index].categoria}`;
   } else if (url.includes("github")){
-    id = parts[8];
+    id = parts[11];
     videoTitleElem.textContent = `${currentPlaylist[index].categoria}`;
   } else {
     id = parts[5];

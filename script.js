@@ -162,13 +162,8 @@ function handleVideoClick() {
 
 function handleArtistClick() {
   if (currentArtist) {
-    if (currentVideoURL.includes("github")){
-      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(currentArtist)} rule34video.com`;
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(currentArtist)} porn`;
       window.open(searchUrl, '_blank');
-    } else {
-      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(currentArtist)} porn`;
-      window.open(searchUrl, '_blank');
-    }
   } else {
     alert(`Artista não disponível.`);
   }

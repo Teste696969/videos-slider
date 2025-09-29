@@ -152,6 +152,32 @@ function getRandomIndex(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function handleVideoClick() {
+  if (currentVideoURL) {
+    window.open(currentVideoURL, '_blank');
+  } else {
+    alert(`ID do vídeo não disponível.`);
+  }
+}
+
+function handleArtistClick() {
+  if (currentArtist) {
+    if (currentVideoURL.includes("github")){
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(currentArtist)} rule34video.com`;
+      window.open(searchUrl, '_blank');
+    } else {
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(currentArtist)} porn`;
+      window.open(searchUrl, '_blank');
+    }
+  } else {
+    alert(`Artista não disponível.`);
+  }
+}
+
+// Adiciona uma única vez
+videoURL.addEventListener('click', handleVideoClick);
+artistURL.addEventListener('click', handleArtistClick);
+
 // Função para carregar um vídeo (agora usa currentPlaylist)
 function loadVideo(index) {
   if (index < 0 || index >= maxVideoIndex) return; // Validação de índice
@@ -162,11 +188,26 @@ function loadVideo(index) {
   const artist = currentPlaylist[index].autor;
   const url = currentPlaylist[index].url;
   const parts = url.split('/');
-  const id = parts[5];
-  // Atualizar dinamicamente o título do vídeo usando autor e categoria
-  videoTitleElem.textContent = `${currentPlaylist[index].categoria}`;
+
+  let id = null
+
+  if (url.includes("prem.boomio-cdn.com")) {
+    id = parts[5];
+    videoTitleElem.textContent = `${currentPlaylist[index].categoria}`;
+  } else if (url.includes("github")){
+    id = parts[8];
+    videoTitleElem.textContent = `${currentPlaylist[index].categoria}`;
+  } else {
+    id = parts[5];
+    videoTitleElem.textContent = `${currentPlaylist[index].categoria}`;
+  }
+
   videoURL.textContent = `${id}`;
   artistURL.textContent = `${artist}`;
+
+  currentVideoURL = url;
+  currentArtist = artist;
+
 }
 
 // Play/Pause
